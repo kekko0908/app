@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="it" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 80px; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">Patrimonio</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link active" aria-current="page" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="statistiche.html">Statistiche</a></li>
+        <li class="nav-item"><a class="nav-link" href="transazioni.html">Transazioni</a></li>
+      </ul>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="darkSwitch">
+        <label class="form-check-label" for="darkSwitch">Dark</label>
+      </div>
+    </div>
+  </div>
+</nav>
+<div class="container">
+  <h1 class="mb-4">Dashboard</h1>
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Numero Conti</h5>
+          <p id="accountsCount" class="display-6">0</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Saldo Totale</h5>
+          <p id="totalBalance" class="display-6">€0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h2>Ultime Transazioni</h2>
+  <table class="table" id="lastTransactions">
+    <thead><tr><th>Data</th><th>Conto</th><th>Importo</th><th>Cat.</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const darkSwitch = document.getElementById('darkSwitch');
+const accounts = JSON.parse(localStorage.getItem('accounts') || '[]');
+const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+const categories = [
+    { name: 'Cibo', icon: '🍔' },
+    { name: 'Shopping', icon: '🛍️' },
+    { name: 'Casa', icon: '🏠' },
+    { name: 'Trasporti', icon: '🚍' },
+    { name: 'Veicoli', icon: '🚗' },
+    { name: 'Intrattenimento', icon: '🎮' },
+    { name: 'Comunicazione PC', icon: '💻' },
+    { name: 'Spese Finanziarie', icon: '💳' },
+    { name: 'Investimenti', icon: '📈' }
+];
+const navbar=document.querySelector('.navbar');
+function updateNavbarTheme(theme){
+  navbar.classList.remove('navbar-light','bg-light','navbar-dark','bg-dark');
+  if(theme==='dark') navbar.classList.add('navbar-dark','bg-dark');
+  else navbar.classList.add('navbar-light','bg-light');
+}
+function getBalance(name){
+  return transactions.filter(t=>t.account===name)
+    .reduce((sum,t)=>sum+(t.type==='entrata'?t.amount:-t.amount),0);
+}
+function init(){
+  document.getElementById('accountsCount').textContent = accounts.length;
+  const total = accounts.reduce((s,a)=>s+getBalance(a.name),0);
+  document.getElementById('totalBalance').textContent = '€ '+total.toFixed(2);
+  const tbody = document.querySelector('#lastTransactions tbody');
+  const last = transactions.slice(-5).reverse();
+  tbody.innerHTML='';
+  last.forEach(t=>{
+    const tr=document.createElement('tr');
+    const cat = categories.find(c=>c.name===t.category);
+    const catLabel = cat?`${cat.icon} ${cat.name}`:t.category;
+    const sign = t.type==='entrata'?'+':'-';
+    const d = new Date(t.date);
+    const label = d.toLocaleDateString('it-IT',{weekday:'short'})+' '+d.toLocaleDateString();
+    tr.innerHTML=`<td>${label}</td><td>${t.account}</td><td>${sign}€ ${t.amount.toFixed(2)}</td><td>${catLabel}</td>`;
+    tbody.appendChild(tr);
+  });
+  const savedTheme = localStorage.getItem('theme')||'light';
+  document.documentElement.setAttribute('data-bs-theme', savedTheme);
+  darkSwitch.checked = savedTheme==='dark';
+  updateNavbarTheme(savedTheme);
+}
+darkSwitch.addEventListener('change',()=>{
+  const theme = darkSwitch.checked ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-bs-theme', theme);
+  localStorage.setItem('theme', theme);
+  updateNavbarTheme(theme);
+});
+init();
+</script>
+</body>
+</html>
