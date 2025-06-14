@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            padding-top: 40px;
+            padding-top: 80px;
         }
         .account {
             margin-bottom: 1rem;
@@ -22,8 +22,27 @@
     </style>
 </head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.html">Patrimonio</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="dashboard.html">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="statistiche.html">Statistiche</a></li>
+        <li class="nav-item"><a class="nav-link" href="transazioni.html">Transazioni</a></li>
+      </ul>
+      <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="darkSwitch">
+        <label class="form-check-label" for="darkSwitch">Dark</label>
+      </div>
+    </div>
+  </div>
+</nav>
 <div class="container">
-    <h1 class="mb-4">Gestione del Patrimonio</h1>
+    <h1 class="mb-4 mt-4">Gestione del Patrimonio</h1>
     <div class="card mb-4">
         <div class="card-body">
             <form id="accountForm" class="row g-3">
@@ -277,6 +296,16 @@
     renderAccounts();
     populateAccountSelect();
     populateCategorySelect();
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    darkSwitch.checked = savedTheme === 'dark';
+
+    darkSwitch.addEventListener('change', () => {
+        const theme = darkSwitch.checked ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-bs-theme', theme);
+        localStorage.setItem('theme', theme);
+    });
 </script>
 </body>
 </html>
