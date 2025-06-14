@@ -6,10 +6,10 @@ Questa semplice applicazione web permette di creare e gestire conti con un nome,
 
 1. Apri `index.html` in un browser moderno.
 2. Usa la barra di navigazione per passare alle pagine **Dashboard**, **Statistiche** e **Transazioni**.
-3. In **Dashboard** trovi il riepilogo dei conti e le ultime operazioni.
-4. In **Statistiche** puoi visualizzare grafici dinamici scegliendo l'intervallo temporale (1 settimana, 1 mese, 6 mesi o 1 anno).
+3. In **Dashboard** trovi il riepilogo dei conti e le ultime operazioni. Da qui puoi anche creare un nuovo conto con il pulsante **Nuovo Conto**.
+4. In **Statistiche** visualizzi grafici dinamici scegliendo l'intervallo temporale (1 settimana, 1 mese, 6 mesi o 1 anno) e un prospetto del flusso di cassa con il confronto rispetto al periodo precedente.
 5. Nella pagina **Transazioni** gestisci il registro completo e puoi aggiungere nuovi movimenti.
-6. Nell'homepage compila il form indicando il **Nome del Conto** e, facoltativamente, una serie di **tag** separati da virgola, quindi clicca **Aggiungi Conto**.
+6. Nell'homepage compila il form indicando il **Nome del Conto** e, facoltativamente, una serie di **tag** separati da virgola, quindi clicca **Aggiungi Conto** (o utilizza il pulsante **Nuovo Conto** nella Dashboard).
 7. Premi **Inserisci Transazione** per registrare un movimento su un conto. Oltre a conto, importo e tipo (entrata/uscita) viene richiesta anche la **data** dell'operazione, la **categoria** e una descrizione facoltativa.
 8. Ogni card mostra il saldo aggiornato e può essere eliminata tramite il pulsante *Elimina*.
 

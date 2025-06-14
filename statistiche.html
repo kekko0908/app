@@ -8,6 +8,12 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         body { padding-top: 80px; }
+        .chart-wrapper {
+            background: var(--bs-body-bg);
+            border-radius: .5rem;
+            box-shadow: 0 0 1rem rgba(0,0,0,0.1);
+            padding: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -41,7 +47,39 @@
       <option value="365">1 anno</option>
     </select>
   </div>
-  <canvas id="statsChart" height="120"></canvas>
+  <div class="row mb-3" id="totals">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="card-title">Entrate</h6>
+          <p id="totEntrate" class="h5 mb-0">€0</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="card-title">Uscite</h6>
+          <p id="totUscite" class="h5 mb-0">€0</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <h6 class="card-title">Flusso di cassa</h6>
+          <p id="totFlusso" class="h5 mb-0">€0</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p id="compareInfo" class="text-center text-muted small mb-3"></p>
+  <div class="chart-wrapper mb-4">
+    <canvas id="statsChart" height="120"></canvas>
+  </div>
+  <div class="chart-wrapper mb-4">
+    <canvas id="flowChart" height="120"></canvas>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -49,8 +87,9 @@
 const darkSwitch = document.getElementById('darkSwitch');
 const rangeSelect = document.getElementById('rangeSelect');
 const ctx = document.getElementById('statsChart');
+const flowCtx = document.getElementById('flowChart');
 const transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
-let chart;
+let chart, flowChart;
 const navbar=document.querySelector('.navbar');
 function updateNavbarTheme(theme){
   navbar.classList.remove('navbar-light','bg-light','navbar-dark','bg-dark');
@@ -75,17 +114,53 @@ function prepareData(days){
   return {labels,entrate,uscite};
 }
 
+function computeTotals(start, end){
+  let entrata=0, uscita=0;
+  transactions.forEach(t=>{
+    const d=new Date(t.date);
+    if(d>=start && d<=end){
+      if(t.type==='entrata') entrata+=t.amount; else uscita+=t.amount;
+    }
+  });
+  return {entrata, uscita, flusso: entrata-uscita};
+}
+
 function render(days){
   const data=prepareData(days);
+  const now=new Date();
+  const start=new Date(now.getTime()-days*24*60*60*1000);
+  const prevStart=new Date(now.getTime()-days*2*24*60*60*1000);
+  const prevEnd=new Date(now.getTime()-days*24*60*60*1000);
+  const totals=computeTotals(start,now);
+  const prevTotals=computeTotals(prevStart,prevEnd);
+  document.getElementById('totEntrate').textContent='€ '+totals.entrata.toFixed(2);
+  document.getElementById('totUscite').textContent='€ '+totals.uscita.toFixed(2);
+  document.getElementById('totFlusso').textContent='€ '+totals.flusso.toFixed(2);
+  const diff=totals.flusso-prevTotals.flusso;
+  const info=document.getElementById('compareInfo');
+  info.textContent='Variazione vs periodo precedente: '+(diff>=0?'+':'')+diff.toFixed(2)+' €';
+
   if(chart) chart.destroy();
+  if(flowChart) flowChart.destroy();
+
   chart=new Chart(ctx,{
     type:'line',
     data:{
       labels:data.labels,
       datasets:[
-        {label:'Entrate',data:data.entrate,borderColor:'green',tension:0.2},
-        {label:'Uscite',data:data.uscite,borderColor:'red',tension:0.2}
+        {label:'Entrate',data:data.entrate,borderColor:'green',backgroundColor:'rgba(0,128,0,0.2)',tension:0.2},
+        {label:'Uscite',data:data.uscite,borderColor:'red',backgroundColor:'rgba(255,0,0,0.2)',tension:0.2}
       ]
+    },
+    options:{scales:{y:{beginAtZero:true}}}
+  });
+
+  const cash=data.labels.map((_,i)=>data.entrate[i]-data.uscite[i]);
+  flowChart=new Chart(flowCtx,{
+    type:'bar',
+    data:{
+      labels:data.labels,
+      datasets:[{label:'Flusso di cassa',data:cash,backgroundColor:'steelblue'}]
     },
     options:{scales:{y:{beginAtZero:true}}}
   });
